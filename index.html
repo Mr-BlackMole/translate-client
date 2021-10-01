@@ -1,0 +1,72 @@
+<script>
+    function gen_tk(str) {
+        function pu(a, b) {
+            for (var c = 0; c < b.length - 2; c += 3) {
+                var d = b.charAt(c + 2);
+                d = "a" <= d ? d.charCodeAt(0) - 87 : Number(d);
+                d = "+" == b.charAt(c + 1) ? a >>> d : a << d;
+                a = "+" == b.charAt(c) ? a + d & 4294967295 : a ^ d
+            }
+            return a
+        }
+        const tkk = "445065.3487808933";
+        let demical_comp = tkk.split(".");
+        let frac_part = Number(demical_comp[0]) || 0;
+        let e = [], f = 0
+        for (let g = 0; g < str.length; g++) {
+            let h = str.charCodeAt(g);
+            128 > h ? e[f++] = h : (2048 > h ? e[f++] = h >> 6 | 192 : (55296 == (h & 64512) && g + 1 < str.length && 56320 == (str.charCodeAt(g + 1) & 64512) ? (h = 65536 + ((h & 1023) << 10) + (str.charCodeAt(++g) & 1023),
+                e[f++] = h >> 18 | 240,
+                e[f++] = h >> 12 & 63 | 128) : e[f++] = h >> 12 | 224,
+                e[f++] = h >> 6 & 63 | 128),
+                e[f++] = h & 63 | 128)
+        }
+        str = frac_part;
+        for (f = 0; f < e.length; f++)
+            str += e[f],
+                str = pu(str, "+-a^+6");
+        str = pu(str, "+-3^+b+-f");
+
+        str ^= Number(demical_comp[1]) || 0;
+        0 > str && (str = (str & 2147483647) + 2147483648);
+        str %= 1E6;
+        return str.toString() + "." + (str ^ frac_part)
+    }
+    
+    function getSelectionText() {
+        var text = "";
+        if (window.getSelection) {
+            text = window.getSelection().toString();
+        } else if (document.selection && document.selection.type != "Control") {
+            text = document.selection.createRange().text;
+        }
+        return text;
+    }
+
+    document.onmouseup = document.onkeyup = function () {
+        var textSelected = getSelectionText();
+        if (textSelected != "") {
+            var tk = gen_tk(textSelected);
+            var url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q="+ textSelected+ "&tk="+ tk;
+            //alert(textSelected + " "+ tk);
+
+            fetch(url).then(function(response) {
+                return response.json();
+            }).then(function (data) {
+                console.log(JSON.stringify(data));
+                document.getElementById("rs").innerText = data[0][0][0];
+            }).catch(function (e) {
+                console.log(e);
+            });
+        }
+    };
+</script>
+
+<dip id="rs" style="color: blue;"></dip>
+
+<div>
+    hiện tại em throw và trả về sessionId ở trong meta
+</div>
+<div>
+    web đã resume được nhưng nếu session đó có replay thì nó sẽ bị replay luôn
+</div>
